@@ -111,11 +111,12 @@ ESP32 ESP-WROOM-32 with W5500 (or W5100)
 | ----------------- | ----- |
 | 3V3               | VCC   |
 | GND               | GND   |
-| GPIO5(VSPI_CS)    | CS    |
-| GPIO18(VSPI_CLK)  | SCK   |
-| GPIO23(VSPI_MOSI) | MOSI  |
-| GPIO19(VSPI_MISO) | MISO  |
-| GPIO34            | RST   |
+| GPIO15(HSPI_CS)   | CS    |
+| GPIO14(HSPI_CLK)  | SCK   |
+| GPIO13(HSPI_MOSI) | MOSI  |
+| GPIO12(HSPI_MISO) | MISO  |
+| GPIO19            | RST   |
+| GPIO4 User LED    |       |
 
 Top view of WIZ5500 Mini module
 
