@@ -59,6 +59,94 @@ t = t - 3155673600
 
 print('Local time: {}'.format(localtime(t)))
 
+
+# set pin D4 as output (blue LED)
+led_pin = Pin(4, Pin.OUT)
+led_pin.value(1)
+
+
+# simple socket based webpage
+def web_page():
+    if led_pin.value() == 1:
+        led_state = "ON"
+    else:
+        led_state = "OFF"
+
+    html = """
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="description" content="Setup system">
+    <title>ESP32 Web server - WIZnet W5100/W5500</title>
+    </head>
+    <body>
+    <div align="center">
+    <h2>Control LED</h2>
+    LED state: <strong>{}</strong>
+    <p><a href="/?led=on"><button class="button">ON</button></a><br>
+    </p>
+    <p><a href="/?led=off"><button class="button button2">OFF</button></a><br>
+    </p>
+    Time: {}
+    </div>
+    </body>
+    </html>
+    """.format(led_state, localtime())
+    return html
+
+
+s = socket.socket()
+s.bind((nic.pretty_ip(nic.ip_address), 80))
+s.listen(5)
+
+while True:
+    new_client_sock = None
+
+    try:
+        new_client_sock, client_address = s.accept()
+    except OSError as e:
+        if e.args[0] != 11:     # 11 = timeout expired
+            raise e
+
+    print('Client connection from {}'.format(client_address))
+
+    if new_client_sock:
+        new_client_sock.settimeout(0.5)
+        try:
+            # request content looks like
+            # b'GET /?led=off HTTP/1.1\r\nHost: 192.168.178.7\r\nUser-Agent:...
+            # we only need the GET payload at the beginning, stopping after
+            # 20 bytes is sufficient
+            request = new_client_sock.recv(20)
+
+            if '/?led=on' in request:
+                print("Turn LED ON")
+                led_pin.value(1)
+            if '/?led=off' in request:
+                print("Turn LED OFF")
+                led_pin.value(0)
+        except OSError as e:
+            # MicroPython raises an OSError instead of socket.timeout
+            # print("Socket OSError aka TimeoutError: {}".format(e))
+            pass
+        except Exception as e:
+            # print("Socket request error:", e)
+            new_client_sock.close()
+            new_client_sock = None
+
+        if new_client_sock:
+            # sent webpage to client
+            response = web_page()
+            new_client_sock.send(b'HTTP/1.1 200 OK\n')
+            new_client_sock.send(b'Connection: close\n')
+            new_client_sock.send(b'Content-Type: text/html\n')
+            new_client_sock.send(b'Content-Length: {}\n\n'.
+                                 format(len(response)))
+            new_client_sock.send(response.encode())
+            new_client_sock.close()
+
 """
 # Picoweb used Asyncio, which is not working with this WIZNET5K code
 # https://github.com/micropython/micropython/issues/8938
