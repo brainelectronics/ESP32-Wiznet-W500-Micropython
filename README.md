@@ -1,146 +1,147 @@
 # Micropython-ESP32-W5500 (Wiznet)
+
 Connect your ESP32 to W5500 (Wiznet) ethernet module. and use Python requests as http client
 
-Hardware
---------
-ESP32 ESP-WROOM-32
-<br/>
-W5500 (or W5100)
-<br/>
+---------------
 
-Firmware
---------
-Micropython
-<br/>
+<!-- MarkdownTOC -->
 
-Tools
---------
-python
-ampy (install using pip)
-```
-pip install adafruit-ampy
-```
+- [General](#general)
+- [Installation](#installation)
+    - [Install required tools](#install-required-tools)
+- [Setup](#setup)
+    - [Install package with pip](#install-package-with-pip)
+    - [Manually](#manually)
+        - [Upload files to board](#upload-files-to-board)
+- [Hardware](#hardware)
+    - [Wiring](#wiring)
+- [Limitations](#limitations)
 
-Wiring
--------
+<!-- /MarkdownTOC -->
 
-| ESP-32  | W5500 |
-| ------------- | ------------- |
-| 3V3  | V  |
-| GND  | G  |
-| GPIO5(VSPI_CS)  | CS  |
-| GPIO18(VSPI_CLK)  | SCK  |
-| GPIO23(VSPI_MOSI)  | MO  |
-| GPIO19(VSPI_MISO)  | MI  |
-| GPIO34  | RST  |
+## General
 
-Instructions
------
-1) Upload wiznet5k.mpy, wiznet5k_dhcp.mpy, wiznet5k_dns.mpy, wiznet5k_socket.mpy,sma_esp32_w5500_requests with ampy
+Forked from
+[Ayyoubzadeh/ESP32-Wiznet-W500-Micropython][ref-ayyoubzadeh-esp32-wiznet-w500]
 
-example: (replace COM9 with your esp32 connected serial port)
-```
-ampy --port COM9 put wiznet5k.mpy
-ampy --port COM9 put wiznet5k_dhcp.mpy
-ampy --port COM9 put wiznet5k_dns.mpy
-ampy --port COM9 put wiznet5k_socket.mpy
-ampy --port COM9 put sma_esp32_w5500_requests.mpy
+Same as code posted by [vinz-uts on Micropython Forum][ref-upy-forum-wiznet5k]
+
+## Installation
+
+### Install required tools
+
+Python3 must be installed on your system. Check the current Python version
+with the following command
+
+```bash
+python --version
+python3 --version
 ```
 
+Depending on which command `Python 3.x.y` (with x.y as some numbers) is
+returned, use that command to proceed.
 
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
 
-2) run main.py or below code:
-
-```
-from wiznet5k import WIZNET5K
-from machine import Pin, SPI
-import wiznet5k_socket as socket
-import time
-import struct
-import sma_esp32_w5500_requests as requests
-
-
-
-spi = SPI(2)
-cs = Pin(5,Pin.OUT)
-rst=Pin(34)
-nic = WIZNET5K(spi,cs,rst)
-
-TEXT_URL = "http://quietlushbrightverse.neverssl.com/online/"
-
-
-print("Chip Version:", nic.chip)
-print("MAC Address:", [hex(i) for i in nic.mac_address])
-print("My IP address is:", nic.pretty_ip(nic.ip_address))
-print("IP lookup google.com: %s" %nic.pretty_ip(nic.get_host_by_name("google.com")))
-
-# Initialize a requests object with a socket and ethernet interface
-requests.set_socket(socket, nic)
-
-
-#nic._debug = True
-print("Fetching text from", TEXT_URL)
-r = requests.get(TEXT_URL)
-print('-'*40)
-print(r.text)
-print('-'*40)
-r.close()
-
-print("Done!")
-```
-Limitations
-----------
-Only Works with http (not https)
-
-How to login in asp.net forms with getting a cookie (forms-based authentication)
------------------
-First we need to get login page after that we need to post the username and password with __VIEWSTATE of the page, Finally, we need to send the cookie for private pages. in this example the login page named logon.aspx and the private page is default.aspx .
-```
-from wiznet5k import WIZNET5K
-from machine import Pin, SPI
-import wiznet5k_socket as socket
-import sma_esp32_w5500_requests as requests
-
-def findVal(txt,tag):
-    g=txt[txt.find(tag):]
-    g=g[g.find("value"):]
-    g=g[:g.find("/>")]
-    g=g.strip()
-    g=g.replace("value=\"","")
-    g=g[:-1] # remove "
-    return g
-
-spi = SPI(2)
-cs = Pin(5,Pin.OUT)
-rst=Pin(34)
-nic = WIZNET5K(spi,cs,rst)
-
-
-print("Chip Version:", nic.chip)
-print("MAC Address:", [hex(i) for i in nic.mac_address])
-print("My IP address is:", nic.pretty_ip(nic.ip_address))
-
-
-requests.set_socket(socket, nic)
-url = 'http://win.smait.ir/logon.aspx'
-g = requests.get(url).text
-payload ={}
-payload['__EVENTTARGET']=""
-payload['__EVENTARGUMENT']=""
-payload['__VIEWSTATE']=findVal(g,'__VIEWSTATE')
-payload['__VIEWSTATEGENERATOR']=findVal(g,'__VIEWSTATEGENERATOR')
-payload['__EVENTVALIDATION']=findVal(g,'__EVENTVALIDATION')
-payload['txtUserName']="1"
-payload['txtUserPass']="2"
-payload['Button1']="Login"
-print(payload)
-
-
-p = requests.post(url, data=payload)
-print(p.headers)
-cookie=p.headers['set-cookie'].split('; expires=')[0]
-print(cookie)
-p2 = requests.get('http://win.smait.ir/default.aspx', headers={"Cookie":cookie})
-print(p2.text)
+pip install -r requirements.txt
 ```
 
+## Setup
+
+<!--
+### Install package with pip
+
+Connect to a network
+
+```python
+import network
+station = network.WLAN(network.STA_IF)
+station.connect('SSID', 'PASSWORD')
+station.isconnected()
+```
+
+and install this lib on the MicroPython device like this
+
+```python
+import upip
+# upip.install('TBD')
+
+# install additional libs for Picoweb example
+upip.install('picoweb')
+upip.install('micropython-ulogging')
+upip.install('utemplate')
+```
+-->
+
+### Manually
+
+#### Upload files to board
+
+Copy the module to the MicroPython board and import them as shown below
+using [Remote MicroPython shell][ref-remote-upy-shell]
+
+Open the remote shell with the following command. Additionally use `-b 115200`
+in case no CP210x is used but a CH34x.
+
+```bash
+rshell -p /dev/tty.SLAB_USBtoUART --editor nano
+```
+
+Perform the following command to copy all files and folders to the device
+
+```bash
+mkdir /pyboard/lib
+
+cp wiznet5k*.py /pyboard/
+cp -r lib/* /pyboard/lib
+
+cp main.py /pyboard
+cp boot.py /pyboard
+```
+
+## Hardware
+
+ESP32 ESP-WROOM-32 with W5500 (or W5100)
+
+### Wiring
+
+| ESP32 Board       | W5500 |
+| ----------------- | ----- |
+| 3V3               | VCC   |
+| GND               | GND   |
+| GPIO5(VSPI_CS)    | CS    |
+| GPIO18(VSPI_CLK)  | SCK   |
+| GPIO23(VSPI_MOSI) | MOSI  |
+| GPIO19(VSPI_MISO) | MISO  |
+| GPIO34            | RST   |
+
+Top view of WIZ5500 Mini module
+
+```
+             LAN
+             | |
+             | |
+            || ||
+        -------------
+  GND  | GND    GND  | GND
+  GND  | GND    3.3V | 3.3V
+  MOSI | MISO   3.3V | 3.3V
+  SCK  | SCK    NC   | NC
+  CS   | CS     RST  | 3.3V
+  NC   | INT    MISO | MISO
+        -------------
+```
+
+## Limitations
+
+ - Only Works with http (not https)
+ - Does not support asyncio
+     - [W5500-EVB-PICO: setblocking, SOL_SOCKET, SO_REUSEADDR NOT working; Cannot use Asyncio start_server()][ref-micropython-w5500-async-issue]
+
+<!-- Links -->
+[ref-ayyoubzadeh-esp32-wiznet-w500]: https://github.com/Ayyoubzadeh/ESP32-Wiznet-W500-Micropython
+[ref-upy-forum-wiznet5k]: https://forum.micropython.org/viewtopic.php?t=5851&start=10
+[ref-remote-upy-shell]: https://github.com/dhylands/rshell
+[ref-micropython-w5500-async-issue]: https://github.com/micropython/micropython/issues/8938
