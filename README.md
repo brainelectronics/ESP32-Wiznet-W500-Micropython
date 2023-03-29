@@ -2,19 +2,20 @@
 
 Connect your ESP32 to W5500 (Wiznet) ethernet module. and use Python requests as http client
 
+![Untitled](https://user-images.githubusercontent.com/92551110/189515479-bfadad62-0bf1-4efc-84bb-ae88b58ec12a.png)
+
 ---------------
 
 <!-- MarkdownTOC -->
 
 - [General](#general)
 - [Installation](#installation)
-    - [Install required tools](#install-required-tools)
+  - [Install required tools](#install-required-tools)
 - [Setup](#setup)
-    - [Install package with pip](#install-package-with-pip)
-    - [Manually](#manually)
-        - [Upload files to board](#upload-files-to-board)
+  - [Manually](#manually)
+    - [Upload files to board](#upload-files-to-board)
 - [Hardware](#hardware)
-    - [Wiring](#wiring)
+  - [Wiring](#wiring)
 - [Limitations](#limitations)
 
 <!-- /MarkdownTOC -->
@@ -49,31 +50,6 @@ pip install -r requirements.txt
 ```
 
 ## Setup
-
-<!--
-### Install package with pip
-
-Connect to a network
-
-```python
-import network
-station = network.WLAN(network.STA_IF)
-station.connect('SSID', 'PASSWORD')
-station.isconnected()
-```
-
-and install this lib on the MicroPython device like this
-
-```python
-import upip
-# upip.install('TBD')
-
-# install additional libs for Picoweb example
-upip.install('picoweb')
-upip.install('micropython-ulogging')
-upip.install('utemplate')
-```
--->
 
 ### Manually
 

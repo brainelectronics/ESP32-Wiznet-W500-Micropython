@@ -304,13 +304,39 @@ class WIZNET5K:  # pylint: disable=too-many-public-methods
         return 0
 
 
+    @property
+    def link_speed(self):
+        """ "Returns link speed."""
+        if self._chip_type == "w5500":
+            data = self.read(REG_PHYCFGR, 0x00)
+            if data[0] & 0x01:  # link up
+                if data[0] & 0x02:
+                    return 100
+                else:
+                    return 10
+        return None
+
+
+    @property
+    def link_full_duplex(self):
+        """ "Returns if link is full duplex."""
+        if self._chip_type == "w5500":
+            data = self.read(REG_PHYCFGR, 0x00)
+            if data[0] & 0x01:  # link up
+                if data[0] & 0x04:
+                    return True
+                else:
+                    return False
+        return None
+
+
     def remote_port(self, socket_num):
         """Returns the port of the host who sent the current incoming packet."""
         if socket_num >= self.max_sockets:
             return self._pbuff
         for octet in range(0, 2):
             self._pbuff[octet] = self._read_socket(socket_num, REG_SNDPORT + octet)[0]
-        return int((self._pbuff[0] << 8) | self._pbuff[0])
+        return int((self._pbuff[0] << 8) | self._pbuff[1])
 
     @property
     def ifconfig(self):
